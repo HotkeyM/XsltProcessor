@@ -1,0 +1,9 @@
+<!DOCTYPE schema>
+<schema xmlns="http://www.ascc.net/xml/schematron" xmlns:aixm="http://www.aixm.aero/schema/5.1">
+   <ns prefix="aixm" uri="http://www.aixm.aero/schema/5.1"/>
+   <pattern name="object">
+      <rule context="//aixm:AirportHeliportTimeSlice">
+         <assert test="not(./aixm:ARP/aixm:ElevatedPoint/aixm:horizontalAccuracy[@uom='M']) &#xa;or &#xa;./aixm:ARP/aixm:ElevatedPoint/aixm:horizontalAccuracy >= 30">The horizontal accuracy of the AirportHeliport ARP shall be at least 30 M</assert>
+      </rule>
+   </pattern>
+</schema>
