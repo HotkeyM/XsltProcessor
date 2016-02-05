@@ -7,7 +7,7 @@ XsltProcessor::XsltProcessor(QObject *parent) : QObject(parent)
 
 }
 
-QString XsltProcessor::ProcessXsltFiles(const QString &xmlFile, const QString &xsltFile)
+QString  XsltProcessor::ProcessXsltFiles(const QString &xmlFile, const QString &xsltFile)
 {
     QFile xml(xmlFile);
     xml.open(QIODevice::ReadOnly);
