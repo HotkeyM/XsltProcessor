@@ -8,24 +8,24 @@ General convensions:
 
 - No exceptions are used (Qt-style). Returns empty object, zero or false if fails.
 
-##/src/libxmlxsltprocessor.h
+## /src/libxmlxsltprocessor.h
 
 LibXmlXsltProcessor is *XsltProcessor* class implementation based on C-styled [libxml2](http://xmlsoft.org).
 **Deprecated. Slow and has compatibility issues with Schematron 1.5.**
 
 
-##/src/msxmlxsltprocessor.h
+## /src/msxmlxsltprocessor.h
 
 MsXmlXsltProcessor is *XsltProcessor* class implementation based on MS Windows ActiveX.
 **Deprecated. Has compatibility issues with Schematron 1.5.**
 
-##/src/javasaxonprocessor.h
+## /src/javasaxonprocessor.h
 
 JavaSaxonProcessor is *XsltProcessor* class implementation based on Java Virtual Machine that runs Saxon framework. Bulky solution, uses JNI and C++11 template magic to provide fast calls from C++ code into the JVM. The only way I found to run modern Schematron specification in Qt/C++11 environment.
 
 **Jar-file with Saxon routine functions should be specified in constructor, or default jar-file is used instead**
 
-##/src/xsltprocessor.h
+## /src/xsltprocessor.h
 
 Base class for all schematron processors.
 
@@ -48,7 +48,7 @@ Applies XSLT rule from file _xsltFile_ to _xmlData_, saves result to _dstFile_ f
 - `virtual QString GetLastError()`
 Returns last error if any, empty string if there are no
 
-##/src/schematronprocessor.h
+## /src/schematronprocessor.h
 
 Provides Schematron compilation and processing.
 
@@ -93,7 +93,7 @@ Runs compiled schematron _compiledSchematron_ on input _xmlData_ to be asserted.
 Compiles schematron given by _rules_ list and saves to the _compiledFilename_ file
 
 
-#Usage:#
+# Usage:
 
 ```
 #include "/src/javasaxonprocessor.h"
