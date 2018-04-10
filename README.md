@@ -1,4 +1,4 @@
-# XSLT processor
+# Schematron compiler/processor
 
 This repository contains XSLT processing tools. This code provides [Schematron](http://schematron.com) asserting language implementation in Qt5/C++11 environment.
 
