@@ -6,12 +6,10 @@
 #include <QMessageBox>
 #include <ActiveQt/QAxObject>
 
-
-
 class Q_DECL_EXPORT MsXmlXsltProcessor : public XsltProcessor
 {
     Q_OBJECT
-public:
+  public:
     explicit MsXmlXsltProcessor();
 
     QString ProcessXslt(const QString &xmlData, const QString &xsltData);
@@ -20,10 +18,10 @@ public:
     QString GetLastError();
 
     ~MsXmlXsltProcessor();
-public slots:
+  public slots:
     void ShowError(int errcode, QString err, QString err2, QString err3);
-private:
 
+  private:
     QString lastError;
 
     bool exceptionFlag;
@@ -31,6 +29,5 @@ private:
     QAxObject *xml;
     QAxObject *xslt;
 };
-
 
 #endif // MSXMLXSLTPROCESSOR_H

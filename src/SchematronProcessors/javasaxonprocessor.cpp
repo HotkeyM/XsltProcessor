@@ -2,7 +2,7 @@
 
 JavaSaxonProcessor::JavaSaxonProcessor()
 {
-    Singleton<Java>::GetInstance("c:/java/saxonxslt.jar");
+    Singleton<Java>::GetInstance("../java/saxonxslt.jar");
 }
 
 JavaSaxonProcessor::JavaSaxonProcessor(QString jarFile)
@@ -13,13 +13,15 @@ JavaSaxonProcessor::JavaSaxonProcessor(QString jarFile)
 QString JavaSaxonProcessor::ProcessXslt(const QString &xmlData, const QString &xsltData)
 {
 
-    if (xmlData.isEmpty()) qDebug() << "xmldata is empty";
-    if (xsltData.isEmpty()) qDebug() << "xsltdata is empty";
+    if (xmlData.isEmpty())
+        qDebug() << "xmldata is empty";
+    if (xsltData.isEmpty())
+        qDebug() << "xsltdata is empty";
 
+    std::string str = Singleton<Java>::GetInstance()->CallStaticMethod<std::string, const char *, const char *>("org/xsltprocessor/processor", "ProcessXsltException", xmlData.toLocal8Bit().constData(), xsltData.toLocal8Bit().constData());
 
-    std::string str = Singleton<Java>::GetInstance()->CallStaticMethod<std::string, const char*, const char*>("org/xsltprocessor/processor", "ProcessXsltException", xmlData.toLocal8Bit().constData(), xsltData.toLocal8Bit().constData());
-
-    if (!str.empty()) qDebug() << "processing success" << str.size();
+    if (!str.empty())
+        qDebug() << "processing success" << str.size();
 
     if (Singleton<Java>::GetInstance()->Exception())
     {
@@ -42,5 +44,3 @@ QString JavaSaxonProcessor::GetLastError()
 {
     return lastError;
 }
-
-

@@ -13,24 +13,19 @@
 
 #include "xsltprocessor.h"
 
-
-
-
 class Q_DECL_EXPORT SchematronProcessor : public QObject
 {
     Q_OBJECT
-public:
-
+  public:
     struct SchematronRule
     {
-        SchematronRule(){}
-        SchematronRule(QString rule, QString context, QString description):rule(rule),context(context),description(description){}
+        SchematronRule() {}
+        SchematronRule(QString rule, QString context, QString description) : rule(rule), context(context), description(description) {}
 
         QString rule;
         QString context;
         QString description;
     };
-
 
     typedef SchematronProcessor::SchematronRule Rule;
 
@@ -46,29 +41,28 @@ public:
 
     QDomElement RuleToDomElement(const Rule &r, QDomDocument doc = QDomDocument());
 
-    QString ExportSchematron(const QList <Rule> &rules);
+    QString ExportSchematron(const QList<Rule> &rules);
     QString ExportSchematron(const Rule &r);
     QString ExportSchematron(const QString &rule, const QString &context, const QString &description);
 
-    QString CompileExportedSchematron(const QString& schematron);
+    QString CompileExportedSchematron(const QString &schematron);
 
-    bool ExportAndCompileSchematron(const QList <Rule> &rules, const QString exportFilename, const QString compileFilename);
+    bool ExportAndCompileSchematron(const QList<Rule> &rules, const QString exportFilename, const QString compileFilename);
 
     QString ProcessSchematron(const QString &xmlData);
 
-    bool ExportSchematronToFile(const QList <Rule> &rules, const QString &filename);
+    QString RunCompiledSchematron(const QString &xmlData, const QString &compiledSchematron);
+
+    bool ExportSchematronToFile(const QList<Rule> &rules, const QString &filename);
     bool ExportSchematronToFile(const Rule &r, const QString &filename);
     bool ExportSchematronToFile(const QString &rule, const QString &context, const QString &description, const QString &filename);
 
-    bool CompileSchematronToFile(const QList <Rule> &rules, QString compiledFilename);
+    bool CompileSchematronToFile(const QList<Rule> &rules, QString compiledFilename);
 
+  signals:
 
-signals:
-
-public slots:
-private:
-
-
+  public slots:
+  private:
     bool debug = false;
 
     QString schematronCompilerFile = "skeleton1-5.xsl";
@@ -79,7 +73,7 @@ private:
 
     QDomElement FillElementWithRules();
 
-    QList <Rule> rules;
+    QList<Rule> rules;
 
     QDomDocument *schematronDocument = nullptr;
     QDomElement rulesElement;

@@ -1,17 +1,13 @@
 #include "msxmlxsltprocessor.h"
 
-MsXmlXsltProcessor::MsXmlXsltProcessor():exceptionFlag(false)
+MsXmlXsltProcessor::MsXmlXsltProcessor() : exceptionFlag(false)
 {
     xml = new QAxObject("MSXML2.DOMDOCUMENT.6.0", this);
 
     xslt = new QAxObject("MSXML2.DOMDOCUMENT.6.0", this);
 
-    connect(xml, SIGNAL(exception(int, QString, QString, QString)), this, SLOT(ShowError(int,QString,QString,QString)));
-
-
+    connect(xml, SIGNAL(exception(int, QString, QString, QString)), this, SLOT(ShowError(int, QString, QString, QString)));
 }
-
-
 
 QString MsXmlXsltProcessor::ProcessXslt(const QString &xmlData, const QString &xsltData)
 {
@@ -25,11 +21,9 @@ QString MsXmlXsltProcessor::ProcessXslt(const QString &xmlData, const QString &x
     bool setProp;
     //setProp = xml->setProperty("ProhibitDTD", false);
     setProp = xml->dynamicCall("setProperty(\"ProhibitDTD\", false)").toBool();
-    setProp = xml->setProperty("validateOnParse",false);
+    setProp = xml->setProperty("validateOnParse", false);
     setProp = xml->setProperty("resolveExternals", false);
     setProp = xml->setProperty("async", false);
-
-
 
     //////connect(xml, SIGNAL(exception(int, QString, QString, QString)), this, SLOT(ShowError(int,QString,QString,QString)));
     xml->dynamicCall("loadXML(QString)", xmlData);
@@ -49,11 +43,8 @@ QString MsXmlXsltProcessor::ProcessXslt(const QString &xmlData, const QString &x
     //////connect(xslt, SIGNAL(exception(int, QString, QString, QString)), this, SLOT(ShowError(int,QString,QString,QString)));
     xslt->dynamicCall("loadXML(QString)", xsltData);
 
-
     //if (xsl.parseError.errorCode != 0)
-   //     WScript.Echo ("XSL Parse Error : " + xsl.parseError.reason);
-
-
+    //     WScript.Echo ("XSL Parse Error : " + xsl.parseError.reason);
 
     if (xslt->querySubObject("parseError")->property("errorCode").toInt() != 0)
     {
@@ -91,7 +82,7 @@ QString MsXmlXsltProcessor::ProcessXsltFiles(const QString &xmlFile, const QStri
     bool setProp;
     //setProp = xml->setProperty("ProhibitDTD", false);
     setProp = xml->dynamicCall("setProperty(\"ProhibitDTD\", false)").toBool();
-    setProp = xml->setProperty("validateOnParse",false);
+    setProp = xml->setProperty("validateOnParse", false);
     setProp = xml->setProperty("resolveExternals", false);
     setProp = xml->setProperty("async", false);
 
@@ -111,9 +102,8 @@ QString MsXmlXsltProcessor::ProcessXsltFiles(const QString &xmlFile, const QStri
     //////connect(xslt, SIGNAL(exception(int, QString, QString, QString)), this, SLOT(ShowError(int,QString,QString,QString)));
     xslt->dynamicCall("load(QString)", xsltFile);
 
-
     //if (xsl.parseError.errorCode != 0)
-   //     WScript.Echo ("XSL Parse Error : " + xsl.parseError.reason);
+    //     WScript.Echo ("XSL Parse Error : " + xsl.parseError.reason);
 
     if (xslt->querySubObject("parseError")->property("errorCode").toInt() != 0)
     {
@@ -126,7 +116,8 @@ QString MsXmlXsltProcessor::ProcessXsltFiles(const QString &xmlFile, const QStri
 
     if (!docElement)
     {
-        qDebug() << "Something bad";
+        qDebug() << "Something not good";
+        return QString();
     }
 
     qDebug() << "xml" << xml->dynamicPropertyNames();
@@ -147,7 +138,7 @@ QString MsXmlXsltProcessor::ProcessXsltFiles(const QString &xmlFile, const QStri
         return QString();
     }
 
-   // QString result = xml->querySubObject("documentElement")->property("xml").toString();
+    // QString result = xml->querySubObject("documentElement")->property("xml").toString();
     return result;
 }
 
@@ -158,17 +149,12 @@ QString MsXmlXsltProcessor::GetLastError()
 
 MsXmlXsltProcessor::~MsXmlXsltProcessor()
 {
+    //No dtor needed beacause all ActiveX objects declared as children
     //Деструктор не нужен, ком-объекты удалятся, т.к. они потомки данного объекта
 }
 
 void MsXmlXsltProcessor::ShowError(int errcode, QString err, QString err2, QString err3)
 {
     exceptionFlag = true;
-
     lastError = err + ". " + err2 + ". " + err3;
-    /*QMessageBox msg;
-
-    msg.setText("Ошибка: " + err + ";" + err2);
-    msg.exec();
-    */
 }

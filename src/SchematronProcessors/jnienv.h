@@ -9,64 +9,62 @@
 template <typename T>
 class Singleton
 {
-public:
+  public:
     Singleton() = delete;
 
     template <typename... Args>
-    static T* GetInstance(Args... args);
+    static T *GetInstance(Args... args);
 
-private:
-    static T* instance;
+  private:
+    static T *instance;
 };
 
 template <typename T>
 template <typename... Args>
-T* Singleton<T>::GetInstance(Args... args)
+T *Singleton<T>::GetInstance(Args... args)
 {
 
     if (!instance)
     {
-       instance = new T(args...);
+        instance = new T(args...);
     }
     return instance;
 }
 
-template<typename T> T* Singleton<T>::instance;
-
-
+template <typename T>
+T *Singleton<T>::instance;
 
 class Java
 {
-public:
-    Java ()
+  public:
+    Java()
     {
-        qDebug () << "singleton constructor";
+        qDebug() << "singleton constructor";
 
         JavaVMInitArgs vm_args;
         JavaVMOption options[2];
 
         options[0].optionString =
-              "-Djava.class.path=c:/java/test2.jar";
+            "-Djava.class.path=c:/java/test2.jar";
 
         options[1].optionString = "-verbose:jni";
 
-        memset((void*)&vm_args,0, sizeof(vm_args));
+        memset((void *)&vm_args, 0, sizeof(vm_args));
         vm_args.ignoreUnrecognized = JNI_FALSE;
         vm_args.version = JNI_VERSION_1_6;
         vm_args.nOptions = 1;
         vm_args.options = options;
 
-
         // Construct a VM
         jint res = JNI_CreateJavaVM(&javaVM, (void **)&env, &vm_args);
     }
 
-    Java (const char * jarPath)
+    Java(const char *jarPath)
     {
         JavaVMInitArgs vm_args;
         JavaVMOption options[2];
 
-        char *buf = new char[strlen("-Djava.class.path=") + strlen (jarPath)];
+        char *buf = new char[strlen("-Djava.class.path=") + strlen(jarPath)];
 
         strcpy(buf, "-Djava.class.path=");
 
@@ -74,17 +72,15 @@ public:
 
         options[1].optionString = "-verbose:jni";
 
-        memset((void*)&vm_args,0, sizeof(vm_args));
+        memset((void *)&vm_args, 0, sizeof(vm_args));
         vm_args.ignoreUnrecognized = JNI_FALSE;
         vm_args.version = JNI_VERSION_1_6;
         vm_args.nOptions = 1;
         vm_args.options = options;
 
-
         // Construct a VM
         jint res = JNI_CreateJavaVM(&javaVM, (void **)&env, &vm_args);
     }
-
 
     ~Java()
     {
@@ -95,15 +91,14 @@ public:
     // CallStaticMethod implemetation
 
     template <typename MethodType, typename... Args>
-    MethodType CallStaticMethod(const char* className, const char* mname, Args... args)
+    MethodType CallStaticMethod(const char *className, const char *mname, Args... args)
     {
 
         qDebug() << "jniwrapper.h: javaWM=" << javaVM;
         qDebug() << "jniwrapper.h: javaEnv=" << env;
 
-
         const size_t arg_num = sizeof...(Args);
-        std::string signatures[arg_num] = { GetType(args)... };
+        std::string signatures[arg_num] = {GetType(args)...};
 
         std::string signature_string;
         signature_string.reserve(15);
@@ -121,33 +116,32 @@ public:
 
         qDebug() << "jniwrapper.h: clazz found";
 
-        qDebug() << "class=" << clazz.get() << ";method_name=" << mname <<";signature=" << signature_string.c_str();
+        qDebug() << "class=" << clazz.get() << ";method_name=" << mname << ";signature=" << signature_string.c_str();
 
         jmethodID method = env->GetStaticMethodID(clazz.get(), mname, signature_string.c_str());
 
         qDebug() << "jniwrapper.h: method got " << method;
-
 
         return Impl<MethodType>::CallStaticMethod(env, clazz.get(), method, args...);
     }
 
     bool Exception()
     {
-        bool res =  env->ExceptionCheck();
+        bool res = env->ExceptionCheck();
         env->ExceptionClear();
         return res;
     }
 
-private:
-
+  private:
     JavaVM *javaVM = nullptr;
     JNIEnv *env = nullptr;
 
-    JNIEnv* getEnv()
+    JNIEnv *getEnv()
     {
         JNIEnv *env = NULL;
-        int status = javaVM->AttachCurrentThread((void**)&env, NULL);
-        if (status < 0) {
+        int status = javaVM->AttachCurrentThread((void **)&env, NULL);
+        if (status < 0)
+        {
             return NULL;
         }
 
@@ -156,23 +150,24 @@ private:
 
     class JavaVoid
     {
-        public:
-        JavaVoid(){}
+      public:
+        JavaVoid() {}
         static JavaVoid GetVoid()
         {
             return v;
         }
 
-        private:
+      private:
         static JavaVoid v;
     };
 
     class JniClass
     {
-        JNIEnv* m_env;
+        JNIEnv *m_env;
         jclass m_class;
-    public:
-        JniClass(JNIEnv* env, const char* name)
+
+      public:
+        JniClass(JNIEnv *env, const char *name)
             : m_env(env)
         {
             m_class = m_env->FindClass(name);
@@ -193,16 +188,17 @@ private:
     struct JObjectHolder
     {
         jobject jObject;
-        JNIEnv* m_env;
+        JNIEnv *m_env;
 
         JObjectHolder()
             : m_env(nullptr)
-        {}
+        {
+        }
 
-        JObjectHolder(JNIEnv* env, jobject obj)
-            : jObject(obj)
-            , m_env(env)
-        {}
+        JObjectHolder(JNIEnv *env, jobject obj)
+            : jObject(obj), m_env(env)
+        {
+        }
 
         ~JObjectHolder()
         {
@@ -222,8 +218,7 @@ private:
 
         jobject get() { return jObject; }
 
-        JNIEnv* getEnv() { return m_env; }
-
+        JNIEnv *getEnv() { return m_env; }
     };
 
     /////////////////////////////////////////////////////////
@@ -234,9 +229,8 @@ private:
         JObjectHolder jObject;
 
         // move constructor
-        JniHolder(JniHolder&& other)
-            : jObject(other.jObject.getEnv(), jObject.detach())
-            , val(other.val)
+        JniHolder(JniHolder &&other)
+            : jObject(other.jObject.getEnv(), jObject.detach()), val(other.val)
         {
             qDebug() << "JniHolder->move dtor";
         }
@@ -298,7 +292,7 @@ private:
         }
 
         // string
-        explicit JniHolder(JNIEnv *env, const char* arg)
+        explicit JniHolder(JNIEnv *env, const char *arg)
             : jObject(env, env->NewStringUTF(arg))
         {
             val.l = jObject.get();
@@ -316,34 +310,28 @@ private:
 
         operator jvalue()
         {
-            qDebug () << "static cast JNIHolder->jvalue";
+            qDebug() << "static cast JNIHolder->jvalue";
             return val;
-
         }
 
         jvalue get() { return val; }
     };
 
-
-
-
     template <typename T>
     std::string GetTypeName();
 
-
-
     template <typename T>
-    std::string GetType(const T&)
+    std::string GetType(const T &)
     {
         return GetTypeName<T>();
     }
 
-
-    void GetTypeRecursive(std::string&)
-    {   }
+    void GetTypeRecursive(std::string &)
+    {
+    }
 
     template <typename T, typename... Args>
-    void GetTypeRecursive(std::string& signatureString, T value, Args... args)
+    void GetTypeRecursive(std::string &signatureString, T value, Args... args)
     {
         signatureString += GetTypeName<T>();
         GetTypeRecursive(signatureString, args...);
@@ -360,34 +348,32 @@ private:
         //  int -> CallIntMethod
         //  void -> CallVoidMethod...
         template <typename... Args>
-        static MethodType CallMethod(JNIEnv* env, jclass clazz, jmethodID method, Args... args);
+        static MethodType CallMethod(JNIEnv *env, jclass clazz, jmethodID method, Args... args);
 
         template <typename... Args>
-        static void CallStaticMethod(JNIEnv* env, jclass clazz, jmethodID method, Args... args);
-    };  
-
+        static void CallStaticMethod(JNIEnv *env, jclass clazz, jmethodID method, Args... args);
+    };
 };
-
-
 
 /////////////////////////////////////////////////////////
 // Impl<void>
 
 template <>
-struct Java::Impl <void>
+struct Java::Impl<void>
 {
     template <typename... Args>
-    static void CallStaticMethod(JNIEnv* env, jclass clazz, jmethodID method, Args... args)
+    static void CallStaticMethod(JNIEnv *env, jclass clazz, jmethodID method, Args... args)
     {
         const int size = sizeof...(args);
         if (size != 0)
         {
             //JniHolder holders[size] = { std::move(JniHolder(env, args))... };
-            JniHolder holders[size] =  {JniHolder(env, args)...};
+            JniHolder holders[size] = {JniHolder(env, args)...};
             jvalue vals[size];
             //for (size_t i = 0; i < size; ++i)
             //    vals[i] = static_cast<jvalue>(holders[i]);
-            for (auto i = std::begin(holders); i !=std::end(holders); ++i)vals[std::distance(std::begin(holders),i)] = static_cast<jvalue>(*i);
+            for (auto i = std::begin(holders); i != std::end(holders); ++i)
+                vals[std::distance(std::begin(holders), i)] = static_cast<jvalue>(*i);
 
             return env->CallStaticVoidMethodA(clazz, method, vals);
         }
@@ -400,23 +386,23 @@ struct Java::Impl <void>
 // Impl<int>
 
 template <>
-struct Java::Impl <int>
+struct Java::Impl<int>
 {
     template <typename... Args>
-    static int CallStaticMethod(JNIEnv* env, jclass clazz, jmethodID method, Args... args)
+    static int CallStaticMethod(JNIEnv *env, jclass clazz, jmethodID method, Args... args)
     {
         const int size = sizeof...(args);
         if (size != 0)
         {
 
-            JniHolder holders[size] =  {JniHolder(env, args)...};
+            JniHolder holders[size] = {JniHolder(env, args)...};
             // массив холдеров - чтобы холдеры не разрушались после каста, как временные объекты
             // и не вызывали освобождение соответствующего ресурса
 
             jvalue vals[size];
 
-            for (auto i = std::begin(holders); i !=std::end(holders); ++i)vals[std::distance(std::begin(holders),i)] = static_cast<jvalue>(*i);
-
+            for (auto i = std::begin(holders); i != std::end(holders); ++i)
+                vals[std::distance(std::begin(holders), i)] = static_cast<jvalue>(*i);
 
             //std::cout << "vals"
 
@@ -424,15 +410,14 @@ struct Java::Impl <int>
             {
                 jvalue j;
 
-                for(auto &i: vals) qDebug() << &i << "jvalue.l value = " << i.l;
+                for (auto &i : vals)
+                    qDebug() << &i << "jvalue.l value = " << i.l;
             }
-
 
             return env->CallStaticIntMethodA(clazz, method, vals);
         }
 
         return env->CallStaticIntMethod(clazz, method);
-
     }
 };
 
@@ -440,24 +425,23 @@ struct Java::Impl <int>
 // Impl<float>
 
 template <>
-struct Java::Impl <float>
+struct Java::Impl<float>
 {
     template <typename... Args>
-    static float CallStaticMethod(JNIEnv* env, jclass clazz, jmethodID method, Args... args)
+    static float CallStaticMethod(JNIEnv *env, jclass clazz, jmethodID method, Args... args)
     {
         const int size = sizeof...(args);
         if (size != 0)
         {
-            JniHolder holders[size] =  {JniHolder(env, args)...};
+            JniHolder holders[size] = {JniHolder(env, args)...};
 
             jvalue vals[size];
 
-            for (auto i = std::begin(holders); i !=std::end(holders); ++i)vals[std::distance(std::begin(holders),i)] = static_cast<jvalue>(*i);
-
+            for (auto i = std::begin(holders); i != std::end(holders); ++i)
+                vals[std::distance(std::begin(holders), i)] = static_cast<jvalue>(*i);
 
             //jvalue vals[size] = { static_cast<jvalue>(JniHolder(env, args))... };
             return env->CallStaticFloatMethodA(clazz, method, vals);
-
         }
 
         return env->CallStaticFloatMethod(clazz, method);
@@ -468,10 +452,10 @@ struct Java::Impl <float>
 // Impl<std::string>
 
 template <>
-struct Java::Impl <std::string>
+struct Java::Impl<std::string>
 {
     template <typename... Args>
-    static std::string CallStaticMethod(JNIEnv* env, jclass clazz, jmethodID method, Args... args)
+    static std::string CallStaticMethod(JNIEnv *env, jclass clazz, jmethodID method, Args... args)
     {
         //qDebug() << "d";
         const int size = sizeof...(args);
@@ -480,11 +464,12 @@ struct Java::Impl <std::string>
         {
             //qDebug() << "dd";
             //jvalue vals[size] = { static_cast<jvalue>(JniHolder(env, args))... };
-            JniHolder holders[size] =  {JniHolder(env, args)...};
+            JniHolder holders[size] = {JniHolder(env, args)...};
 
             jvalue vals[size];
 
-            for (auto i = std::begin(holders); i !=std::end(holders); ++i)vals[std::distance(std::begin(holders),i)] = static_cast<jvalue>(*i);
+            for (auto i = std::begin(holders); i != std::end(holders); ++i)
+                vals[std::distance(std::begin(holders), i)] = static_cast<jvalue>(*i);
 
             jstr = (jstring)env->CallStaticObjectMethodA(clazz, method, vals);
             //qDebug() << "ddd";
@@ -497,9 +482,10 @@ struct Java::Impl <std::string>
             return std::string();
 
         //qDebug() << "dddd";
-        const char* chars = env->GetStringUTFChars(jstr, NULL);
+        const char *chars = env->GetStringUTFChars(jstr, NULL);
 
-        std::cout << "Impl: CallStaticMethod returned=" << chars << endl << std::flush;
+        std::cout << "Impl: CallStaticMethod returned=" << chars << endl
+                  << std::flush;
         //qDebug() << "deb";
 
         std::string result;
@@ -512,8 +498,6 @@ struct Java::Impl <std::string>
         return result;
     }
 };
-
-
 
 template <>
 inline std::string Java::GetTypeName<void>()
@@ -571,7 +555,7 @@ inline std::string Java::GetTypeName<double>()
 }
 
 template <>
-inline std::string Java::GetTypeName<const char*>()
+inline std::string Java::GetTypeName<const char *>()
 {
     return "Ljava/lang/String;";
 }
@@ -587,7 +571,5 @@ inline std::string Java::GetTypeName<jobject>()
 {
     return "Ljava/lang/Object;";
 }
-
-
 
 #endif // JNIENV_H

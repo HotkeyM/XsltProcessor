@@ -10,9 +10,10 @@ SchematronProcessor::SchematronProcessor(XsltProcessor *proc, QObject *parent) :
     QFile skeleton(schematronCompilerFile);
     if (skeleton.open(QIODevice::ReadOnly))
     {
-        schematronCompiler =  skeleton.readAll();
+        schematronCompiler = skeleton.readAll();
     }
-    else qDebug() << "Unable to open schematron compiler file";
+    else
+        qDebug() << "Unable to open schematron compiler file";
     skeleton.close();
 }
 
@@ -22,25 +23,24 @@ SchematronProcessor::SchematronProcessor(XsltProcessor *proc, bool preprocess, Q
     QFile skeleton(schematronCompilerFile);
     if (skeleton.open(QIODevice::ReadOnly))
     {
-        schematronCompiler =  skeleton.readAll();
-
+        schematronCompiler = skeleton.readAll();
     }
-    else qDebug() << "Unable to open schematron compiler file";
+    else
+        qDebug() << "Unable to open schematron compiler file";
     skeleton.close();
 }
 
-
 SchematronProcessor::~SchematronProcessor()
 {
-    if (proc) delete proc;
-
-
+    if (proc)
+        delete proc;
 }
 
-bool SchematronProcessor::CompileSchematronToFile(const QList <Rule> &rules, QString compiledFilename)
+bool SchematronProcessor::CompileSchematronToFile(const QList<Rule> &rules, QString compiledFilename)
 {
     QFile f(schematronCompilerFile);
-    if (!f.open(QIODevice::ReadOnly)) return false;
+    if (!f.open(QIODevice::ReadOnly))
+        return false;
 
     QString skelet = f.readAll();
 
@@ -56,7 +56,7 @@ bool SchematronProcessor::CompileSchematronToFile(const QList <Rule> &rules, QSt
         QFile deb("debuglog/" + QString::number(QDateTime::currentMSecsSinceEpoch()) + ".xml");
         if (deb.open(QIODevice::WriteOnly))
         {
-            QTextStream out (&deb);
+            QTextStream out(&deb);
             out << compiled;
         }
 
@@ -64,8 +64,9 @@ bool SchematronProcessor::CompileSchematronToFile(const QList <Rule> &rules, QSt
         return false;
     }
 
-    QFile compiledFile (compiledFilename);
-    if (!compiledFile.open(QIODevice::WriteOnly)) return false;
+    QFile compiledFile(compiledFilename);
+    if (!compiledFile.open(QIODevice::WriteOnly))
+        return false;
 
     QTextStream str(&compiledFile);
     str << compiled;
@@ -79,34 +80,31 @@ bool SchematronProcessor::CheckSchematronRule(const QString &rule, const QString
     QString skelet;
     if (schematronCompiler.isEmpty())
     {
-    QFile f(schematronCompilerFile);
-    if (!f.open(QIODevice::ReadOnly)) return false;
-    skelet = f.readAll();
-    f.close();
+        QFile f(schematronCompilerFile);
+        if (!f.open(QIODevice::ReadOnly))
+            return false;
+        skelet = f.readAll();
+        f.close();
 
-    qDebug() << "compiler read ok";
-
+        qDebug() << "compiler read ok";
     }
     else
     {
         skelet = schematronCompiler;
     }
 
-    QString exported = ExportSchematron(rule, context ,"test");
+    QString exported = ExportSchematron(rule, context, "test");
 
     //qDebug() << "export schematron ok";
 
     QString compiled = proc->ProcessXslt(exported, skelet);
 
-
     //qDebug() << "______processXslt ok____";
-    QString result = proc->ProcessXslt(compiled,compiled);
+    QString result = proc->ProcessXslt(compiled, compiled);
     if (!proc->GetLastError().isEmpty())
     //if (result.isEmpty())
     {
         //qDebug() << "_________ERROR OUT____________";
-
-
 
         QDir().mkdir("debuglog");
 
@@ -115,7 +113,7 @@ bool SchematronProcessor::CheckSchematronRule(const QString &rule, const QString
         QFile deb("debuglog/" + filename + ".xml");
         if (deb.open(QIODevice::WriteOnly))
         {
-            QTextStream out (&deb);
+            QTextStream out(&deb);
             out << compiled;
         }
 
@@ -125,12 +123,11 @@ bool SchematronProcessor::CheckSchematronRule(const QString &rule, const QString
         if (deb.open(QIODevice::WriteOnly))
         {
 
-            QTextStream out (&deb);
+            QTextStream out(&deb);
             out << exported;
             out << "\n";
             out << proc->GetLastError();
         }
-
 
         return false;
     }
@@ -148,7 +145,8 @@ bool SchematronProcessor::SetDebugOutput(bool debug)
 
 QDomElement SchematronProcessor::RuleToDomElement(const Rule &r, QDomDocument doc)
 {
-    if (doc.isNull()) doc = *schematronDocument;
+    if (doc.isNull())
+        doc = *schematronDocument;
 
     QDomElement domRule = doc.createElement("rule");
     domRule.setAttribute("context", r.context);
@@ -160,11 +158,11 @@ QDomElement SchematronProcessor::RuleToDomElement(const Rule &r, QDomDocument do
     assert.appendChild(doc.createTextNode(r.description + " "));
 
     QDomElement objectName = doc.createElement("value-of");
-    objectName.setAttribute("select","name()");
+    objectName.setAttribute("select", "name()");
     assert.appendChild(objectName);
     assert.appendChild(doc.createTextNode("gml:id="));
     objectName = doc.createElement("value-of");
-    objectName.setAttribute("select","@gml:id");
+    objectName.setAttribute("select", "@gml:id");
     assert.appendChild(objectName);
 
     return domRule;
@@ -172,45 +170,40 @@ QDomElement SchematronProcessor::RuleToDomElement(const Rule &r, QDomDocument do
 
 QString SchematronProcessor::ExportSchematron(const QList<Rule> &rules)
 {
-   if (!proc)
-   {
-       return QString();
-   }
+    if (!proc)
+    {
+        return QString();
+    }
 
+    FormBaseSchematronDocument();
 
+    //qDebug() << "FormBaseSchematronDocument() ok";
 
-   FormBaseSchematronDocument();
+    this->rules = rules;
 
-   //qDebug() << "FormBaseSchematronDocument() ok";
+    //qDebug() << "rules list copy ok";
 
-   this->rules = rules;
+    FillElementWithRules();
 
-   //qDebug() << "rules list copy ok";
+    //qDebug() << "FillElementWithRules(); OK";
 
-   FillElementWithRules();
+    QString exportedSchematron;
+    QTextStream str(&exportedSchematron);
 
-   //qDebug() << "FillElementWithRules(); OK";
+    schematronDocument->save(str, 1);
 
-   QString exportedSchematron;
-   QTextStream str(&exportedSchematron);
+    //qDebug() << "saving to string ok";
 
-   schematronDocument->save(str, 1);
-
-   //qDebug() << "saving to string ok";
-
-   return exportedSchematron;
-
+    return exportedSchematron;
 }
 
 QString SchematronProcessor::ExportSchematron(const Rule &r)
 {
-    QList <Rule> rules;
+    QList<Rule> rules;
 
     rules.append(r);
     return ExportSchematron(rules);
-
 }
-
 
 QString SchematronProcessor::ExportSchematron(const QString &rule, const QString &context, const QString &description)
 {
@@ -222,21 +215,20 @@ QString SchematronProcessor::CompileExportedSchematron(const QString &schematron
 {
     //QFile f(schematronCompilerFile);
     QFile f("skeleton1-5.xsl");
-    if (!f.open(QIODevice::ReadOnly)) return false;
+    if (!f.open(QIODevice::ReadOnly))
+        return false;
 
     QString skelet = f.readAll();
 
     f.close();
 
-
-    if (dynamic_cast<XsltProcessor*>(proc) == nullptr)
+    if (dynamic_cast<XsltProcessor *>(proc) == nullptr)
     {
         qDebug() << "Something wrong";
     }
 
     QString compiled = proc->ProcessXslt(schematron, skelet);
     return compiled;
-
 }
 
 bool SchematronProcessor::ExportAndCompileSchematron(const QList<SchematronProcessor::Rule> &rules, const QString exportFilename, const QString compileFilename)
@@ -246,13 +238,13 @@ bool SchematronProcessor::ExportAndCompileSchematron(const QList<SchematronProce
     //compiledFile.open(QIODevice::WriteOnly);
     //QTextStream strCompile(&compiledFile);
 
-
     QString compiled;
     if (false)
     {
         QString exportedSchematron = ExportSchematron(rules);
 
-        if (exportedSchematron.isEmpty()) return false;
+        if (exportedSchematron.isEmpty())
+            return false;
 
         if (!exportFilename.isEmpty())
         {
@@ -290,7 +282,8 @@ bool SchematronProcessor::ExportAndCompileSchematron(const QList<SchematronProce
             strCompile << comp;
             compiledFile.close();
         }
-        else return false;
+        else
+            return false;
 
         //QString compiledSchematron = CompileExportedSchematron(exportedSchematron);
 
@@ -308,7 +301,6 @@ bool SchematronProcessor::ExportAndCompileSchematron(const QList<SchematronProce
     }
 
     */
-
     }
     else
     {
@@ -317,24 +309,19 @@ bool SchematronProcessor::ExportAndCompileSchematron(const QList<SchematronProce
         if (!exported.isEmpty())
         {
 
+            compiled = proc->ProcessXslt(exported, schematronCompiler);
 
-
-           compiled = proc->ProcessXslt(exported, schematronCompiler);
-
-           /// Почему нельзя открыть файл здесь???
-           /// сложный прикол
-           QFile compiledFile(compileFilename);
-           compiledFile.open(QIODevice::WriteOnly);
-           QTextStream strCompile(&compiledFile);
-           strCompile << compiled;
-           compiledFile.close();
+            /// Почему нельзя открыть файл здесь???
+            /// сложный прикол
+            QFile compiledFile(compileFilename);
+            compiledFile.open(QIODevice::WriteOnly);
+            QTextStream strCompile(&compiledFile);
+            strCompile << compiled;
+            compiledFile.close();
         }
-        else return false;
-
-
+        else
+            return false;
     }
-
-
 
     return true;
 }
@@ -350,13 +337,26 @@ QString SchematronProcessor::ProcessSchematron(const QString &xmlData)
     return compiled;
 }
 
+QString SchematronProcessor::RunCompiledSchematron(const QString &xmlData, const QString &compiledSchematron)
+{
+    if (schematronCompiler.isEmpty())
+    {
+        qDebug() << "Schematron compiled file is not loaded";
+        return QString();
+    }
+    QString asserted = proc->ProcessXslt(xmlData, compiledSchematron);
+    return asserted;
+}
+
 bool SchematronProcessor::ExportSchematronToFile(const QList<SchematronProcessor::Rule> &rules, const QString &filename)
 {
     QString text = ExportSchematron(rules);
-    if (text.isEmpty()) return false;
+    if (text.isEmpty())
+        return false;
 
     QFile f(filename);
-    if (!f.open(QIODevice::WriteOnly)) return false;
+    if (!f.open(QIODevice::WriteOnly))
+        return false;
 
     QTextStream str(&f);
     str << text;
@@ -366,10 +366,12 @@ bool SchematronProcessor::ExportSchematronToFile(const QList<SchematronProcessor
 bool SchematronProcessor::ExportSchematronToFile(const SchematronProcessor::Rule &r, const QString &filename)
 {
     QString text = ExportSchematron(r);
-    if (text.isEmpty()) return false;
+    if (text.isEmpty())
+        return false;
 
     QFile f(filename);
-    if (!f.open(QIODevice::WriteOnly)) return false;
+    if (!f.open(QIODevice::WriteOnly))
+        return false;
 
     QTextStream str(&f);
     str << text;
@@ -378,19 +380,20 @@ bool SchematronProcessor::ExportSchematronToFile(const SchematronProcessor::Rule
 
 bool SchematronProcessor::ExportSchematronToFile(const QString &rule, const QString &context, const QString &description, const QString &filename)
 {
-    QString text = ExportSchematron(rule,context,description);
-    if (text.isEmpty()) return false;
+    QString text = ExportSchematron(rule, context, description);
+    if (text.isEmpty())
+        return false;
 
     QFile f(filename);
-    if (!f.open(QIODevice::WriteOnly)) return false;
+    if (!f.open(QIODevice::WriteOnly))
+        return false;
 
     QTextStream str(&f);
     str << text;
     f.close();
-
 }
 
-QString SchematronProcessor::RemoveComments( QString rule)
+QString SchematronProcessor::RemoveComments(QString rule)
 {
     QRegExp reg;
     //("(\\(:).*?(:\\))");
@@ -413,7 +416,7 @@ QString SchematronProcessor::PreProcessRule(QString rawRules)
     {
         QString substr = reg.cap();
         QString origsubstr = rawRules;
-        substr.replace("," ," or ");
+        substr.replace(",", " or ");
         rawRules.replace(origsubstr, substr);
     }
 
@@ -422,10 +425,9 @@ QString SchematronProcessor::PreProcessRule(QString rawRules)
     return rawRules;
 }
 
-
 QDomElement SchematronProcessor::FillElementWithRules()
 {
-    for (auto &r: rules)
+    for (auto &r : rules)
     {
 
         if (preprocess)
@@ -444,13 +446,11 @@ QDomElement SchematronProcessor::FillElementWithRules()
             //qDebug() << "rule to dom ok. append ok";
         }
         //QString compiled = ProcessXlstFromFileHddBuffer(preprocessed, SCHEMATRON_COMPILER_FILE);
-
     }
 
     //qDebug() << "all rules filled in element";
 
     return rulesElement;
-
 }
 
 QDomElement SchematronProcessor::FormBaseSchematronDocument(const QString &patternName)
@@ -462,38 +462,35 @@ QDomElement SchematronProcessor::FormBaseSchematronDocument(const QString &patte
     }
     schematronDocument = new QDomDocument("schema");
 
-
     schematronDocument->appendChild(schematronDocument->createElement("schema"));
 
-    schematronDocument->documentElement().setAttribute("xmlns","http://www.ascc.net/xml/schematron");
-    schematronDocument->documentElement().setAttribute("xmlns:aixm","http://www.aixm.aero/schema/5.1");
-    schematronDocument->documentElement().setAttribute("xmlns:gml","http://www.opengis.net/gml/3.2");
+    schematronDocument->documentElement().setAttribute("xmlns", "http://www.ascc.net/xml/schematron");
+    schematronDocument->documentElement().setAttribute("xmlns:aixm", "http://www.aixm.aero/schema/5.1");
+    schematronDocument->documentElement().setAttribute("xmlns:gml", "http://www.opengis.net/gml/3.2");
 
-    schematronDocument->documentElement().setAttribute("xmlns:xlink","http://www.w3.org/2000/10/xlink-ns");
+    schematronDocument->documentElement().setAttribute("xmlns:xlink", "http://www.w3.org/2000/10/xlink-ns");
 
-    schematronDocument->documentElement().setAttribute("xmlns:xsi","http://www.w3.org/2000/10/XMLSchema-instance");
-
+    schematronDocument->documentElement().setAttribute("xmlns:xsi", "http://www.w3.org/2000/10/XMLSchema-instance");
 
     QDomElement ns = schematronDocument->createElement("ns");
-    ns.setAttribute("prefix","aixm");
-    ns.setAttribute("uri","http://www.aixm.aero/schema/5.1");
+    ns.setAttribute("prefix", "aixm");
+    ns.setAttribute("uri", "http://www.aixm.aero/schema/5.1");
     schematronDocument->documentElement().appendChild(ns);
 
     QDomElement nsGml = schematronDocument->createElement("ns");
-    nsGml.setAttribute("prefix","gml");
-    nsGml.setAttribute("uri","http://www.opengis.net/gml/3.2");
+    nsGml.setAttribute("prefix", "gml");
+    nsGml.setAttribute("uri", "http://www.opengis.net/gml/3.2");
     schematronDocument->documentElement().appendChild(nsGml);
 
     QDomElement nsXsi = schematronDocument->createElement("ns");
-    nsXsi.setAttribute("prefix","xsi");
-    nsXsi.setAttribute("uri","http://www.w3.org/2000/10/XMLSchema-instance");
+    nsXsi.setAttribute("prefix", "xsi");
+    nsXsi.setAttribute("uri", "http://www.w3.org/2000/10/XMLSchema-instance");
     schematronDocument->documentElement().appendChild(nsXsi);
 
     QDomElement nsXlink = schematronDocument->createElement("ns");
-    nsXlink.setAttribute("prefix","xlink");
-    nsXlink.setAttribute("uri","http://www.w3.org/2000/10/xlink-ns");
+    nsXlink.setAttribute("prefix", "xlink");
+    nsXlink.setAttribute("uri", "http://www.w3.org/2000/10/xlink-ns");
     schematronDocument->documentElement().appendChild(nsXlink);
-
 
     // <pattern name="Predefined values">
     QDomElement pattern = schematronDocument->createElement("pattern");
@@ -501,5 +498,4 @@ QDomElement SchematronProcessor::FormBaseSchematronDocument(const QString &patte
     schematronDocument->documentElement().appendChild(pattern);
     this->rulesElement = pattern;
     return pattern;
-
 }

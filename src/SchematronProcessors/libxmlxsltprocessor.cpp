@@ -19,14 +19,13 @@
 
 LibXmlXsltProcessor::LibXmlXsltProcessor()
 {
-
 }
 
 QString LibXmlXsltProcessor::ProcessXslt(const QString &xmlData, const QString &xsltData)
 {
-    const char* TMP_XSLT_FILENAME = "schema.xsl";
-    const char* TMP_XML_NAMESPACE = "doc.xml";
-    const char* TMP_RESULT_FILENAME = "res.xml";
+    const char *TMP_XSLT_FILENAME = "schema.xsl";
+    const char *TMP_XML_NAMESPACE = "doc.xml";
+    const char *TMP_RESULT_FILENAME = "res.xml";
 
     QFile f(TMP_XML_NAMESPACE);
     f.open(QIODevice::WriteOnly);
@@ -49,11 +48,10 @@ QString LibXmlXsltProcessor::ProcessXslt(const QString &xmlData, const QString &
     xmlSubstituteEntitiesDefault(1);
     xmlLoadExtDtdDefaultValue = 1;
 
-
     style = xmlReadFile(TMP_XSLT_FILENAME, NULL, 0);
     if (!style)
     {
-        qDebug() <<tr( "Ошибка парсинга файла xslt");
+        qDebug() << tr("Ошибка парсинга файла xslt");
         return QString(tr("Ошибка парсинга файла xslt"));
     }
     doc = xmlReadFile(TMP_XML_NAMESPACE, NULL, 0);
@@ -62,7 +60,6 @@ QString LibXmlXsltProcessor::ProcessXslt(const QString &xmlData, const QString &
         qDebug() << tr("Ошибка парсинга файла xml");
         xmlFreeDoc(style);
         return QString(tr("Ошибка парсинга файла xml"));
-
     }
 
     //cur = xsltLoadStylesheetPI(style);
@@ -86,15 +83,11 @@ QString LibXmlXsltProcessor::ProcessXslt(const QString &xmlData, const QString &
         xmlFreeDoc(doc);
         //xmlFreeDoc(style);
         return QString(tr("Невозможо применить таблицу стилей!"));
-
     }
 
-
-    FILE *f2 = fopen(TMP_RESULT_FILENAME,"w");
+    FILE *f2 = fopen(TMP_RESULT_FILENAME, "w");
     xmlDocDump(f2, res);
     fclose(f2);
-
-
 
     f.setFileName(TMP_RESULT_FILENAME);
     f.open(QIODevice::ReadOnly);
@@ -119,17 +112,14 @@ QString LibXmlXsltProcessor::ProcessXsltFiles(const QString &xmlFile, const QStr
     xmlSubstituteEntitiesDefault(1);
     xmlLoadExtDtdDefaultValue = 1;
 
-
     style = xmlReadFile(xsltFile.toLocal8Bit(), NULL, 0);
     if (!style)
     {
-        qDebug() <<tr( "Ошибка парсинга файла xslt");
+        qDebug() << tr("Ошибка парсинга файла xslt");
 
         lastError = "Ошибка парсинга файла xslt";
 
         return QString(tr("Ошибка парсинга файла xslt"));
-
-
     }
     doc = xmlReadFile(xmlFile.toLocal8Bit(), NULL, 0);
     if (!doc)
@@ -140,7 +130,6 @@ QString LibXmlXsltProcessor::ProcessXsltFiles(const QString &xmlFile, const QStr
         lastError = "Ошибка парсинга файла xml";
 
         return QString(tr("Ошибка парсинга файла xml"));
-
     }
 
     //cur = xsltLoadStylesheetPI(style);
@@ -151,8 +140,6 @@ QString LibXmlXsltProcessor::ProcessXsltFiles(const QString &xmlFile, const QStr
         qDebug() << tr("Ошибка загрузка страницы стилей!");
         xmlFreeDoc(doc);
         xmlFreeDoc(style);
-
-
 
         return QString();
     }
@@ -168,24 +155,17 @@ QString LibXmlXsltProcessor::ProcessXsltFiles(const QString &xmlFile, const QStr
         xsltFreeStylesheet(cur);
         xmlFreeDoc(doc);
         return QString();
-
     }
 
     uchar *mem;
 
     int size;
 
-    xmlDocDumpMemory(res,(xmlChar**)&mem, &size);
+    xmlDocDumpMemory(res, (xmlChar **)&mem, &size);
 
-    QString resString = QString::fromUtf8((const char*)mem, size);
+    QString resString = QString::fromUtf8((const char *)mem, size);
 
-    ///delete [] mem;
-    /// может, оно само память освобождает, само же её выделяет
-
-
-
-
-
+    
     xsltFreeStylesheet(cur);
     xmlFreeDoc(doc);
     xmlFreeDoc(res);
@@ -197,6 +177,5 @@ QString LibXmlXsltProcessor::ProcessXsltFiles(const QString &xmlFile, const QStr
 
 LibXmlXsltProcessor::~LibXmlXsltProcessor()
 {
-
+    //No dtor neede - C-styled structs are destoyed before
 }
-

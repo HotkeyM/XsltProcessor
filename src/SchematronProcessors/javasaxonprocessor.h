@@ -6,16 +6,15 @@
 
 class Q_DECL_EXPORT JavaSaxonProcessor : public XsltProcessor
 {
-public:
+  public:
     JavaSaxonProcessor();
     JavaSaxonProcessor(QString jarFile);
 
     QString ProcessXslt(const QString &xmlData, const QString &xsltData);
 
     virtual QString GetLastError();
-private:
 
-
+  private:
     QString lastError;
 };
 

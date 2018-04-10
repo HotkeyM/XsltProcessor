@@ -5,11 +5,9 @@
 
 #include "xsltprocessor.h"
 
-
-
 class Q_DECL_EXPORT LibXmlXsltProcessor : public XsltProcessor
 {
-public:
+  public:
     LibXmlXsltProcessor();
 
     QString ProcessXslt(const QString &xmlData, const QString &xsltData);
@@ -17,12 +15,12 @@ public:
 
     QString GetLastError()
     {
-            return QString();
+        return QString();
     }
 
     ~LibXmlXsltProcessor();
 
-private:
+  private:
     QString lastError;
 };
 
